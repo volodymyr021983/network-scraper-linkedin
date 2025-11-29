@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "LinkedIn network tool",
+  "version": "1.0",
+  "description": "Helps analyze profiles on the LinkedIn network",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "identity",
+    "declarativeNetRequest"
+  ],
+  "host_permissions": [
+    "https://www.linkedin.com/*",
+    "*://127.0.0.1:8090/*"
+  ],
+  "declarative_net_request":{
+    "rule_resources": [
+      {
+        "id": "block_heavy_assets",
+        "enabled": true,
+        "path": "rules.js"
+      }
+    ]
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://www.linkedin.com/*"],
+      "js": ["content.js"],
+      "css": ["content.css"]
+    }
+  ],
+  "background":{
+    "service_worker": "background.js"
+  },
+  "env":{
+    "BACKEND_API": "http://127.0.0.1:8090"
+  }
+}

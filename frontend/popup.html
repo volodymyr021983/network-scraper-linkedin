@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            width: 320px;
+            padding: 0;
+            margin: 0;
+            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f3f2ef; 
+        }
+
+        .container {
+            background: white;
+            padding: 24px;
+            border-bottom: 1px solid #e0e0e0;
+            text-align: center;
+        }
+        .hidden { display: none !important; }
+
+        h2 { margin: 0 0 8px 0; color: #191919; font-size: 18px; }
+        p { margin: 0 0 20px 0; color: #666; font-size: 14px; line-height: 1.5; }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #0a66c2; 
+            color: white;
+        }
+        .btn-primary:hover { background-color: #004182; }
+
+        .btn-secondary {
+            background-color: white;
+            border: 1px solid #666;
+            color: #666;
+            margin-top: 10px;
+        }
+        .btn-secondary:hover { background-color: #f3f2ef; border-color: #191919; color: #191919; }
+        #status { font-size: 12px; margin-top: 12px; min-height: 18px; }
+        .error { color: #d11124; }
+        .success { color: #057642; }
+
+        .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+            background-color: #eee;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="view-login" class="container">
+        <h2>LinkedIn Saver</h2>
+        <p>Sign in to start saving candidates directly to your database.</p>
+        
+        <button id="linkedinLogin" class="btn btn-primary">
+            Sign in with LinkedIn
+        </button>
+        <div id="status"></div>
+    </div>
+
+    <div id="view-app" class="container hidden">
+        <h2 id="user-name">Welcome Back</h2>
+        <p style="margin-bottom: 10px;">Extension is active and protecting data.</p>
+            
+        <button id="btnLogout" class="btn btn-secondary">Sign Out</button>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+.my-candidate-btn {
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 12px;
+    padding: 10px 0;
+    border: 1px solid #0a66c2;
+    border-radius: 20px;
+    background: #ffffff;
+    color: #0a66c2;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.my-candidate-btn:hover {
+    background: #eaf4ff;
+}
+
+.my-candidate-btn:active {
+    background: #d6eaff;
+}

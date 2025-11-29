@@ -1,0 +1,84 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #f3f2ef;
+}
+
+.card {
+    background: #fff;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 20px;
+    overflow-y: auto;
+    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.photo {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #ddd;
+}
+
+.location {
+    color: #666;
+    margin-top: 5px;
+}
+
+.section {
+    margin-bottom: 20px;
+}
+
+.section h3 {
+    color: #0a66c2;
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+
+#skills {
+    padding-left: 18px;
+}
+
+.linkedin-btn {
+    display: block;
+    text-align: center;
+    background: #0a66c2;
+    color: white;
+    padding: 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    margin-top: 20px;
+}
+
+.linkedin-btn:hover {
+    background: #004182;
+}
+#skills {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+#skills li {
+    background: #1f2937;   
+    color: white;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    user-select: none;
+}
