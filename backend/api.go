@@ -31,7 +31,7 @@ func reg_routes(app *pocketbase.PocketBase, client *genai.Client, ctx context.Co
 				return err
 			}
 			result, err := client.Models.GenerateContent(ctx, "gemini-2.5-flash",
-				genai.Text(fmt.Sprintf("You are given a JSON object containing a LinkedIn user profile: %s 1. Analyze the profile and write an objective overview of the candidate in **no more than 6 sentences**, with **no embellishment**, **no assumptions**, and **no fabricated information**. 2. Extract the user's **programming languages and frameworks only** from the **skills** and **about** sections (if they exists) of the provided JSON.Do not include soft skills, tools, certificates, or anything that is not a programming language, database or framework.4.Extract country and city from the location field. Your response must be a **JSON object only**, with the following structure:{ overview: text key_skills: [skill1, skill2, ...] url: url country: country city: city img_url: img_url. Output must be in **English**.", string(bodyBytes))),
+				genai.Text(fmt.Sprintf("You are given a JSON object containing a LinkedIn user profile: %s 1. Analyze the profile and write an objective overview of the candidate in **no more than 6 sentences**, with **no embellishment**, **no assumptions**, and **no fabricated information**. 2. Extract the user's **programming languages and frameworks only** from the **skills** and **about** sections (if they exists) of the provided JSON.Do not include soft skills, tools, certificates, or anything that is not a programming language, database or framework.4.Extract country and city from the location field.5.Extract the year when this person started their career (the year they got their first job). Return only the year as a four-digit number.Your response must be a **JSON object only**, with the following structure:{ overview: text key_skills: [skill1, skill2, ...] url: url career_start_year: career start year country: country city: city img_url: img_url. Output must be in **English**.", string(bodyBytes))),
 				nil)
 			if err != nil {
 				fmt.Println("Error during generation of the promt")
@@ -109,7 +109,9 @@ func AddCandidateTags(app *pocketbase.PocketBase, llmressponse *LLMResponse, use
 
 	addedby := record.GetStringSlice("added_by")
 	addedby = append(addedby, user_id)
+
 	record.Set("added_by", addedby)
+	record.Set("career_start_year", llmressponse.Start_year)
 	record.Set("linkedin", llmressponse.Url)
 	record.Set("profile_overview", llmressponse.Overview)
 	record.Set("tags", tagsIds)
@@ -123,10 +125,11 @@ func AddCandidateTags(app *pocketbase.PocketBase, llmressponse *LLMResponse, use
 }
 
 type LLMResponse struct {
-	Overview  string   `json:"overview"`
-	Url       string   `json:"url"`
-	KeySkills []string `json:"key_skills"`
-	Country   string   `json:"country"`
-	City      string   `json:"city"`
-	Img_url   string   `json:"img_url"`
+	Overview   string   `json:"overview"`
+	Url        string   `json:"url"`
+	KeySkills  []string `json:"key_skills"`
+	Country    string   `json:"country"`
+	City       string   `json:"city"`
+	Img_url    string   `json:"img_url"`
+	Start_year int      `json:"career_start_year"`
 }
