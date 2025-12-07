@@ -31,7 +31,7 @@ func reg_routes(app *pocketbase.PocketBase, client *genai.Client, ctx context.Co
 				return err
 			}
 			result, err := client.Models.GenerateContent(ctx, "gemini-2.5-flash",
-				genai.Text(fmt.Sprintf("You are given a JSON object containing a LinkedIn user profile: %s 1. Analyze the profile and write an objective overview of the candidate in **no more than 6 sentences**, with **no embellishment**, **no assumptions**, and **no fabricated information**. 2. Extract the user's **programming languages and frameworks only** from the **skills** and **about** sections (if they exists) of the provided JSON.Do not include soft skills, tools, certificates, or anything that is not a programming language, database or framework. Your response must be a **JSON object only**, with the following structure:{ overview: text key_skills: [skill1, skill2, ...] url: url location: Country City img_url: img_url. Output must be in **English**.", string(bodyBytes))),
+				genai.Text(fmt.Sprintf("You are given a JSON object containing a LinkedIn user profile: %s 1. Analyze the profile and write an objective overview of the candidate in **no more than 6 sentences**, with **no embellishment**, **no assumptions**, and **no fabricated information**. 2. Extract the user's **programming languages and frameworks only** from the **skills** and **about** sections (if they exists) of the provided JSON.Do not include soft skills, tools, certificates, or anything that is not a programming language, database or framework.4.Extract country and city from the location field. Your response must be a **JSON object only**, with the following structure:{ overview: text key_skills: [skill1, skill2, ...] url: url country: country city: city img_url: img_url. Output must be in **English**.", string(bodyBytes))),
 				nil)
 			if err != nil {
 				fmt.Println("Error during generation of the promt")
@@ -39,6 +39,7 @@ func reg_routes(app *pocketbase.PocketBase, client *genai.Client, ctx context.Co
 			}
 
 			var llm LLMResponse
+			fmt.Println(result.Text())
 			re := regexp.MustCompile(`\{[\s\S]*\}`)
 			jsonStr := re.FindString(result.Text())
 			if jsonStr == "" {
@@ -58,7 +59,7 @@ func reg_routes(app *pocketbase.PocketBase, client *genai.Client, ctx context.Co
 				llm.KeySkills[i] = strings.ToLower(llm.KeySkills[i])
 			}
 
-			err = AddCandidateTags(app, &llm)
+			err = AddCandidateTags(app, &llm, e.Auth.Id)
 			if err != nil {
 				e.Response.WriteHeader(500)
 				return err
@@ -72,7 +73,8 @@ func reg_routes(app *pocketbase.PocketBase, client *genai.Client, ctx context.Co
 		return se.Next()
 	})
 }
-func AddCandidateTags(app *pocketbase.PocketBase, llmressponse *LLMResponse) error {
+func AddCandidateTags(app *pocketbase.PocketBase, llmressponse *LLMResponse, user_id string) error {
+
 	tagColl, err := app.FindCollectionByNameOrId("Tags")
 	CandColl, err := app.FindCollectionByNameOrId("Candidate")
 	if err != nil {
@@ -104,10 +106,15 @@ func AddCandidateTags(app *pocketbase.PocketBase, llmressponse *LLMResponse) err
 			return err
 		}
 	}
+
+	addedby := record.GetStringSlice("added_by")
+	addedby = append(addedby, user_id)
+	record.Set("added_by", addedby)
 	record.Set("linkedin", llmressponse.Url)
 	record.Set("profile_overview", llmressponse.Overview)
 	record.Set("tags", tagsIds)
-	record.Set("location", llmressponse.Location)
+	record.Set("country", llmressponse.Country)
+	record.Set("city", llmressponse.City)
 	err = app.Save(record)
 	if err != nil {
 		return err
@@ -119,6 +126,7 @@ type LLMResponse struct {
 	Overview  string   `json:"overview"`
 	Url       string   `json:"url"`
 	KeySkills []string `json:"key_skills"`
-	Location  string   `json:"location"`
+	Country   string   `json:"country"`
+	City      string   `json:"city"`
 	Img_url   string   `json:"img_url"`
 }

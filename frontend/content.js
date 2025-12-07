@@ -1,11 +1,8 @@
 let injectionInterval = null;
-
 function addCandidateButton() {
-    const profiles = document.querySelectorAll('div[data-view-name="cohort-card"]');
-    
-    profiles.forEach(profile => {
-        if (!profile.querySelector('.my-candidate-btn')) {
-            
+    const parent = document.querySelector('div.ph5.pb5');
+    if(parent){
+        if (!parent.querySelector('.my-candidate-btn')) {
             const btn = document.createElement('button');
             btn.innerText = 'Add Candidate';
             btn.className = 'my-candidate-btn'; 
@@ -16,12 +13,8 @@ function addCandidateButton() {
 
                 chrome.storage.local.get("pb_token", (data) => {
                     if (data.pb_token) {
-                        const linkTag = profile.querySelector('a');
-                        const link = linkTag ? linkTag.href : window.location.href;
-                        
                         chrome.runtime.sendMessage({ 
-                            action: "send_link_data", 
-                            payload: link,
+                            action: "add_candidate", 
                             token: data.pb_token 
                         });
                         
@@ -32,10 +25,9 @@ function addCandidateButton() {
                     }
                 });
             };
-
-            profile.appendChild(btn);
+            parent.appendChild(btn);
         }
-    });
+    };
 }
 
 function removeCandidateButtons() {

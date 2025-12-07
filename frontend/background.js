@@ -1,23 +1,16 @@
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const manifest = chrome.runtime.getManifest();
     const backendIP = manifest.env.BACKEND_API;
-    if (request.action === "send_link_data") {
+    if (request.action === "add_candidate") {
         chrome.storage.local.get("pb_token", (data) => {
-
             if (!data.pb_token) {
                 console.warn("Unauthorized: Attempted to parse profile without login.");
                 sendResponse({ success: false, error: "unauthorized" });
                 return;
             }
-            chrome.tabs.create({ url: request.payload, active: false }, (tab) => {
-
-                const listener = function (tabId, info) {
-                    if (tabId === tab.id && info.status === "complete") {
-
-                        chrome.tabs.onUpdated.removeListener(listener);
-
+            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                         chrome.scripting.executeScript({
-                            target: { tabId: tab.id },
+                            target: { tabId: tabs[0].id },
                             files: ['parser.js']
                         }).then(() => {
                                 console.log("Parser injected successfully");
@@ -26,9 +19,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                                 console.error("Script injection failed", err);
                                 sendResponse({ success: false, error: err.message });
                             });
-                    }
-                };
-                chrome.tabs.onUpdated.addListener(listener);
             });
         });
         return true;

@@ -52,7 +52,7 @@ document.getElementById("linkedinLogin").addEventListener("click", async () => {
 
         const redirectUri = chrome.identity.getRedirectURL(); 
         const authUrl = new URL(provider.authUrl);
-        
+        console.log(redirectUri)
         authUrl.searchParams.set("redirect_uri", redirectUri);
         
         chrome.identity.launchWebAuthFlow(
