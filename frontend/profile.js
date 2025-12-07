@@ -7,7 +7,8 @@ chrome.storage.local.get("candidate_profile", (result) => {
     }
 
     document.getElementById("photo").src = data.img_url || "";
-    document.getElementById("location").textContent = data.location || "";
+    document.getElementById("country").textContent = data.country || "";
+    document.getElementById("city").textContent = data.city || "";
     document.getElementById("overview").textContent = data.overview || "";
 
     const skillsList = document.getElementById("skills");
