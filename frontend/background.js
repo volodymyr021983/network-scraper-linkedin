@@ -1,6 +1,6 @@
+const manifest = chrome.runtime.getManifest();
+const backendIP = manifest.env.BACKEND_API;
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    const manifest = chrome.runtime.getManifest();
-    const backendIP = manifest.env.BACKEND_API;
     if (request.action === "add_candidate") {
         chrome.storage.local.get("pb_token", (data) => {
             if (!data.pb_token) {
@@ -68,10 +68,79 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         });
         return true;
     }
+    if (request.action === "linkedin_login") {
+    handleLogin().then((data) => {
+      sendResponse({ success: true, user: data });
+    }).catch((error) => {
+      sendResponse({ success: false, error: error.message });
+    });
+    return true; 
+  }
 });
 async function isUserLoggedIn() {
     const data = await chrome.storage.local.get("linkedin_access_token");
     if (!data.linkedin_access_token) return false;
 
     return true;
+}
+async function handleLogin() {
+
+  try {
+    const authMethodsRes = await fetch(`${backendIP}/api/collections/users/auth-methods`);
+    const authMethodsData = await authMethodsRes.json();
+    
+    const provider = authMethodsData.authProviders.find(p => p.name === "oidc");
+    
+    if (!provider) {
+      throw new Error("LinkedIn (OIDC) provider not configured in PocketBase");
+    }
+
+    const redirectUri = chrome.identity.getRedirectURL(); 
+    const authUrl = new URL(provider.authUrl);
+    authUrl.searchParams.set("redirect_uri", redirectUri);
+
+    const responseUrl = await chrome.identity.launchWebAuthFlow({
+      url: authUrl.toString(),
+      interactive: true
+    });
+
+    if (chrome.runtime.lastError || !responseUrl) {
+      throw new Error(chrome.runtime.lastError?.message || "Login cancelled");
+    }
+
+    const urlObj = new URL(responseUrl);
+    const code = urlObj.searchParams.get("code");
+    
+    if (!code) throw new Error("No code received from provider");
+
+    const authResponse = await fetch(
+      `${backendIP}/api/collections/users/auth-with-oauth2`, 
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          provider: "oidc", 
+          code: code,
+          codeVerifier: provider.codeVerifier,
+          redirectUrl: redirectUri 
+        })
+      }
+    );
+
+    if (!authResponse.ok) {
+      throw new Error("Failed to exchange token with PocketBase");
+    }
+
+    const authData = await authResponse.json();
+    await chrome.storage.local.set({ 
+      pb_token: authData.token,
+      pb_user: authData.record 
+    });
+
+    return authData.record;
+
+  } catch (error) {
+    console.error("Background Login Error:", error);
+    throw error;
+  }
 }
