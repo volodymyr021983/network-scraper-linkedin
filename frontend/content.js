@@ -62,3 +62,4 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
         handleAuthState(hasToken);
     }
 });
+handleAuthState()
